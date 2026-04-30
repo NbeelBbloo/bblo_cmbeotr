@@ -1,30 +1,74 @@
-# Telegram Browser Bot - Railway Ready
+# بوت تيليجرام عربي للتحكم بمتصفح - جاهز لـ Railway
 
-بوت تيليجرام للتحكم بمتصفح Playwright من داخل تيليجرام. يرسل صورة Screenshot بعد كل خطوة، ويعرض مربعات مرقمة فوق العناصر القابلة للنقر، ويمكنك الضغط عليها من أزرار البوت أو بالأوامر.
+هذا المشروع يشغّل متصفح Chromium داخل Railway ويتحكم به من خلال بوت تيليجرام باللغة العربية بالكامل.
 
-## المميزات
+كل إجراء تقوم به من أزرار البوت يرسل لقطة شاشة تلقائيا، مثل:
 
-- جاهز للنشر على Railway باستخدام Dockerfile.
-- يعمل بـ Telegram long polling، ولا يحتاج Webhook.
-- خادم Health صغير على `PORT` حتى تظهر الخدمة سليمة في Railway.
-- صورة بعد كل خطوة.
-- مربعات مرقمة فوق الروابط، الأزرار، الحقول، وعناصر النقر.
-- أزرار Inline داخل تيليجرام للضغط على العناصر والتنقل والتمرير.
-- أوامر للكتابة، البحث عن نص، الضغط على نص، حذف/ملء الحقول.
-- يدعم Chromium الافتراضي أو متصفح مخصص مثل Chromax إذا كان لديك ملف Linux executable.
-- يدعم البروكسي HTTP/SOCKS5.
-- حماية عبر `ALLOWED_USER_IDS` حتى لا يتحكم بالبروزر إلا حسابك.
+- فتح رابط.
+- بحث Google.
+- الضغط على مربعات مرقمة داخل الصفحة.
+- تعبئة الحقول.
+- الكتابة في الحقل المحدد.
+- مسح الحقل المحدد.
+- البحث عن نص داخل الصفحة.
+- الضغط على نص داخل الصفحة.
+- رجوع، تحديث، سكرول، Enter.
+
+## حل خطأ Playwright الذي ظهر عندك
+
+الخطأ:
+
+```text
+Looks like Playwright was just updated to 1.59.1.
+Please update docker image as well.
+current: mcr.microsoft.com/playwright:v1.49.1-jammy
+required: mcr.microsoft.com/playwright:v1.59.1-jammy
+```
+
+سببه أن صورة Docker قديمة، بينما مكتبة Playwright داخل المشروع إصدارها أحدث.
+
+تم إصلاح ذلك في هذا المشروع عبر توحيد الإصدارين:
+
+```dockerfile
+FROM mcr.microsoft.com/playwright:v1.59.1-jammy
+```
+
+وفي `package.json`:
+
+```json
+"playwright": "1.59.1"
+```
+
+لا تغيّر إصدار Playwright أو صورة Docker إلا إذا جعلتهما نفس الإصدار.
 
 ## النشر على Railway
 
-1. ارفع هذا المشروع إلى GitHub.
-2. افتح Railway وأنشئ Project جديد من GitHub repo.
-3. Railway سيكتشف `Dockerfile` تلقائيا.
-4. افتح Service ثم Variables.
-5. ضع المتغيرات الموجودة في قسم المتغيرات أدناه.
-6. Deploy.
+1. فك الضغط عن الملف.
+2. ارفع المشروع إلى GitHub.
+3. من Railway اختر:
 
-## المتغيرات الأساسية لنسخها في Railway
+```text
+New Project -> Deploy from GitHub Repo
+```
+
+4. اختر المستودع.
+5. Railway سيستخدم `Dockerfile` تلقائيا.
+6. ضع المتغيرات من قسم المتغيرات بالأسفل.
+7. افتح بوت تيليجرام وأرسل:
+
+```text
+/start
+```
+
+## المتغيرات في Railway
+
+افتح:
+
+```text
+Railway -> Service -> Variables -> RAW Editor
+```
+
+ثم ضع:
 
 ```env
 TELEGRAM_BOT_TOKEN=PUT_YOUR_BOT_TOKEN_HERE
@@ -49,91 +93,111 @@ PROXY_USERNAME=
 PROXY_PASSWORD=
 ```
 
-## كيف تحصل على Telegram User ID؟
+### TELEGRAM_BOT_TOKEN
 
-أرسل رسالة إلى بوت مثل `@userinfobot` وسيعطيك رقم ID. ضع الرقم في:
+ضع توكن البوت الذي تحصل عليه من BotFather.
+
+### ALLOWED_USER_IDS
+
+ضع آيدي حسابك في تيليجرام حتى لا يستخدم البوت أي شخص غيرك.
+
+يمكنك معرفة الآيدي عبر إرسال رسالة إلى بوت مثل:
+
+```text
+@userinfobot
+```
+
+مثال:
 
 ```env
 ALLOWED_USER_IDS=123456789
 ```
 
-إذا أردت السماح لأكثر من حساب:
+لأكثر من مستخدم:
 
 ```env
 ALLOWED_USER_IDS=123456789,987654321
 ```
 
-ترك `ALLOWED_USER_IDS` فارغا يسمح لأي شخص يجد البوت باستخدامه، وهذا غير مفضل.
+## طريقة الاستخدام من تيليجرام
 
-## أوامر البوت
+بعد تشغيل البوت أرسل:
 
-- `/start` أو `/help` عرض المساعدة.
-- `/open example.com` فتح رابط.
-- `/google كلمة البحث` البحث في جوجل.
-- `/shot` إرسال صورة فقط.
-- `/boxes` تحديث المربعات المرقمة.
-- `/tap 5` الضغط على العنصر رقم 5.
-- `/fill 8 hello` مسح الحقل رقم 8 وكتابة النص.
-- `/type hello` كتابة النص في العنصر الحالي Focused.
-- `/clear 8` مسح الحقل رقم 8.
-- `/find text` البحث عن نص داخل الصفحة وتمييزه.
-- `/clicktext text` البحث عن نص والضغط عليه.
-- `/press Enter` ضغط زر من لوحة المفاتيح.
-- `/scroll down` أو `/scroll up` تمرير الصفحة.
-- `/back` رجوع.
-- `/forward` تقدم.
-- `/reload` تحديث.
-- `/url` عرض الرابط الحالي.
-- `/close` إغلاق جلسة المتصفح.
+```text
+/start
+```
 
-## تشغيل محلي
+ستظهر لك صورة للموقع ومعها أزرار عربية.
+
+### الأزرار الرئيسية
+
+- `فتح رابط`: يطلب منك الرابط، ثم يفتحه ويرسل Screenshot.
+- `بحث Google`: يطلب منك النص، ثم يبحث ويرسل Screenshot.
+- `إظهار المربعات`: يضع أرقام على العناصر داخل الصفحة ويرسل Screenshot.
+- `لقطة شاشة`: يرسل لقطة جديدة.
+- `تعبئة مربع`: اختر بعدها رقم الحقل من الأزرار، ثم أرسل النص.
+- `كتابة هنا`: يكتب النص في الحقل المحدد حاليا.
+- `مسح الحقل`: يمسح الحقل المحدد حاليا.
+- `اضغط على نص`: أرسل نصا موجودا في الصفحة، وسيبحث عنه ويضغط عليه.
+- `ابحث عن نص`: أرسل نصا موجودا في الصفحة، وسيعلّمه باللون الأخضر.
+- `Enter`: يضغط Enter.
+- `رجوع`: يرجع للصفحة السابقة.
+- `تحديث`: يعيد تحميل الصفحة.
+- `سكرول أعلى / أسفل`: يحرك الصفحة.
+
+### معنى ألوان المربعات
+
+- المربعات الحمراء: عناصر ضغط مثل روابط وأزرار.
+- المربعات الزرقاء: حقول كتابة أو عناصر قابلة للتعبئة.
+
+اضغط على رقم المربع من أزرار تيليجرام، وسيتم تنفيذ الضغط ثم إرسال Screenshot تلقائيا.
+
+## دعم اللغة العربية
+
+المشروع مضبوط افتراضيا على:
+
+```env
+LOCALE=ar-IQ
+TIMEZONE_ID=Asia/Baghdad
+```
+
+ويدعم إدخال النص العربي في البحث والحقول.
+
+## تشغيل محلي اختياري
 
 ```bash
 npm install
-npx playwright install chromium
 cp .env.example .env
 npm start
 ```
 
-## استخدام Chromax
+إذا أردت تشغيله محليا بدون Docker، قد تحتاج إلى تثبيت متصفح Playwright:
 
-Railway يعمل على Linux، لذلك يجب أن يكون ملف Chromax نسخة Linux executable. ضع الملف داخل المشروع مثلا:
-
-```text
-chromax/chromax
+```bash
+npx playwright install chromium
 ```
 
-ثم اجعل المتغير:
+## استخدام Chromax بدلا من Chromium
+
+على Railway يجب أن يكون ملف Chromax نسخة Linux وليس Windows.
+
+إذا وضعت Chromax داخل المشروع مثلا في:
+
+```text
+/app/chromax/chromax
+```
+
+ضع:
 
 ```env
 BROWSER_EXECUTABLE_PATH=/app/chromax/chromax
-```
-
-ويمكنك إضافة flags:
-
-```env
 BROWSER_ARGS=--fingerprint-platform=Win32 --fingerprint-screen-resolution=1920x1080
 ```
 
-ملاحظة: ملف Windows `.exe` لن يعمل على Railway.
-
-## البروكسي
-
-```env
-PROXY_SERVER=http://host:port
-PROXY_USERNAME=username
-PROXY_PASSWORD=password
-```
-
-أو:
-
-```env
-PROXY_SERVER=socks5://host:port
-```
+إذا تركت `BROWSER_EXECUTABLE_PATH` فارغا، سيستخدم Chromium الموجود في Docker image.
 
 ## ملاحظات مهمة
 
-- البوت يتحكم بمتصفح حقيقي، لذلك لا تشارك التوكن مع أحد.
-- استخدم `ALLOWED_USER_IDS` دائما.
-- لا تستخدمه لتجاوز شروط المواقع أو تنفيذ نشاط غير قانوني.
-- Railway filesystem قد يكون مؤقتا، لذلك الجلسات لا تضمن البقاء بعد إعادة النشر إلا إذا أضفت Volume.
+- لا تستخدم البوت بدون ضبط `ALLOWED_USER_IDS`.
+- Railway يستخدم نظام Linux، لذلك ملفات `.exe` الخاصة بويندوز لن تعمل.
+- إذا غيّرت إصدار Playwright في `package.json`، يجب أن تغيّر صورة Docker إلى نفس الإصدار.

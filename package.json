@@ -1,20 +1,20 @@
 {
-  "name": "telegram-browser-bot-railway",
-  "version": "1.0.0",
-  "description": "Telegram bot to control a Playwright browser with screenshots and clickable numbered boxes, ready for Railway.",
+  "name": "telegram-browser-bot-railway-ar-buttons",
+  "version": "2.0.0",
+  "description": "بوت تيليجرام عربي للتحكم بمتصفح Playwright عبر أزرار مع لقطة شاشة تلقائية بعد كل إجراء، جاهز للنشر على Railway.",
   "main": "src/index.js",
   "type": "commonjs",
   "scripts": {
     "start": "node src/index.js",
-    "check": "node --check src/index.js && node --check src/config.js && node --check src/browserController.js && node --check src/telegramBot.js && node --check src/healthServer.js"
+    "check": "node --check src/index.js"
   },
   "engines": {
     "node": ">=20"
   },
   "dependencies": {
-    "dotenv": "^16.4.7",
-    "express": "^4.21.2",
-    "node-telegram-bot-api": "^0.66.0",
-    "playwright": "^1.49.1"
+    "dotenv": "16.4.7",
+    "express": "4.21.2",
+    "playwright": "1.59.1",
+    "telegraf": "4.16.3"
   }
 }
